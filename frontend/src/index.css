@@ -1,0 +1,87 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * { box-sizing: border-box; }
+  :root { color-scheme: dark; }
+
+  body {
+    @apply bg-zinc-950 text-zinc-200 antialiased;
+    font-family: 'Inter', system-ui, sans-serif;
+    /* subtle dot-grid + top glow for depth — reads "designed", not flat */
+    background-image:
+      radial-gradient(60rem 40rem at 50% -10rem, rgba(99, 102, 241, 0.10), transparent 60%),
+      radial-gradient(rgba(255, 255, 255, 0.018) 1px, transparent 1px);
+    background-size: auto, 22px 22px;
+    background-attachment: fixed;
+  }
+
+  h1, h2, h3 { font-family: 'Space Grotesk', Inter, sans-serif; }
+
+  ::selection { background: rgba(99, 102, 241, 0.3); color: #fff; }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 7px; height: 7px; }
+  ::-webkit-scrollbar-track { @apply bg-transparent; }
+  ::-webkit-scrollbar-thumb { @apply bg-zinc-700/70 rounded-full; }
+  ::-webkit-scrollbar-thumb:hover { @apply bg-zinc-600; }
+
+  @keyframes slideUp {
+    from { transform: translateY(16px); opacity: 0; }
+    to   { transform: translateY(0);    opacity: 1; }
+  }
+  @keyframes fadeUp {
+    from { transform: translateY(10px); opacity: 0; }
+    to   { transform: translateY(0);    opacity: 1; }
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700
+           text-white px-4 py-2.5 rounded-lg text-sm font-medium transition-all
+           shadow-lg shadow-indigo-600/20 hover:shadow-indigo-500/30
+           disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none;
+  }
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 bg-zinc-900 hover:bg-zinc-800 active:bg-zinc-900
+           text-zinc-200 border border-zinc-700/80 hover:border-zinc-600 px-4 py-2.5 rounded-lg text-sm font-medium
+           transition-all disabled:opacity-40 disabled:cursor-not-allowed;
+  }
+  .btn-ghost {
+    @apply inline-flex items-center gap-1.5 text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/70
+           px-3 py-2 rounded-lg text-sm transition-colors;
+  }
+  .btn-danger {
+    @apply inline-flex items-center justify-center gap-2 bg-red-500/10 hover:bg-red-500/20 text-red-400
+           border border-red-500/20 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors
+           disabled:opacity-40 disabled:cursor-not-allowed;
+  }
+  .card {
+    @apply bg-zinc-900/70 border border-zinc-800/80 rounded-2xl backdrop-blur-sm;
+  }
+  .input {
+    @apply bg-zinc-950/60 border border-zinc-700/80 rounded-lg px-3 py-2.5 text-sm
+           text-zinc-100 placeholder-zinc-600 focus:outline-none focus:border-indigo-500/60
+           focus:ring-2 focus:ring-indigo-500/15 transition-all w-full;
+  }
+
+  /* typographic helpers */
+  .eyebrow {
+    @apply font-mono text-[11px] uppercase tracking-[0.18em] text-zinc-500;
+  }
+  .display {
+    font-family: 'Space Grotesk', Inter, sans-serif;
+    @apply tracking-tightest;
+  }
+  .stat-num { font-family: 'Space Grotesk', Inter, sans-serif; @apply tabular-nums; }
+
+  /* badges */
+  .badge-live     { @apply bg-emerald-500/10 text-emerald-400 text-xs px-2 py-0.5 rounded-full border border-emerald-500/20; }
+  .badge-upcoming { @apply bg-blue-500/10 text-blue-400 text-xs px-2 py-0.5 rounded-full border border-blue-500/20; }
+  .badge-ended    { @apply bg-zinc-700/40 text-zinc-400 text-xs px-2 py-0.5 rounded-full border border-zinc-700; }
+  .badge-verified { @apply bg-indigo-500/10 text-indigo-400 text-xs px-2 py-0.5 rounded-full border border-indigo-500/20; }
+  .badge-pending  { @apply bg-amber-500/10 text-amber-400 text-xs px-2 py-0.5 rounded-full border border-amber-500/20; }
+  .badge-failed   { @apply bg-red-500/10 text-red-400 text-xs px-2 py-0.5 rounded-full border border-red-500/20; }
+}

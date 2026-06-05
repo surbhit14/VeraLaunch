@@ -1,0 +1,92 @@
+{
+  "schema": "somnia-agent-manifest/v1",
+  "name": "VeraLaunch",
+  "description": "An autonomous, AI-verified token launchpad on Somnia. Other agents can discover live launches, score wallets, participate, and trigger AI milestone verification entirely on-chain.",
+  "chain": {
+    "name": "Somnia Testnet",
+    "chainId": 50312,
+    "rpc": "https://api.infra.testnet.somnia.network",
+    "explorer": "https://testnet.somnia.exploreme.pro"
+  },
+  "contracts": {
+    "SybilRegistry": "0x465303a0bd8668e144913dba8e7f4f7655b58500",
+    "LaunchPool":    "0x36754cde2259b00f99c050ba07262e40b89dc3aa",
+    "VestingVault":  "0x88d6df61b96ceb36065bca3d27e423bfa8578710",
+    "TrustOracle":   "0x9d4efc0305153231027e729b5de6f58b0973ff18"
+  },
+  "somniaAgents": {
+    "platform":     "0x037Bb9C718F3f7fe5eCBDB0b600D607b52706776",
+    "jsonApi":      "13174292974160097713",
+    "parseWebsite": "12875401142070969085",
+    "llm":          "12847293847561029384"
+  },
+  "discovery": {
+    "listLaunches": { "contract": "LaunchPool", "count": "nextPoolId() returns uint256", "read": "pools(uint256 id)" },
+    "listSchedules": { "contract": "VestingVault", "count": "nextScheduleId() returns uint256", "read": "schedules(uint256 id)" },
+    "walletScore": { "contract": "SybilRegistry", "read": "attestations(address) returns (uint8 score, uint256 ts, uint256 expiresAt, bool exists)" }
+  },
+  "actions": [
+    {
+      "id": "scoreWallet",
+      "description": "Request a Sybil uniqueness score for any wallet. Invokes Somnia's JSON API agent (tx count + STT balance), result written on-chain.",
+      "contract": "SybilRegistry",
+      "method": "requestAttestation(address wallet)",
+      "valueSTT": "0.40",
+      "invokes": ["jsonApi"],
+      "result": "attestations(wallet).score (0-100), valid 90 days"
+    },
+    {
+      "id": "createLaunch",
+      "description": "Create an IDO with optional milestone-gated treasury and buyer vesting.",
+      "contract": "LaunchPool",
+      "method": "createPool((address,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint8,uint256,uint256) params, (string,string,uint16,uint256)[] milestones)"
+    },
+    {
+      "id": "participate",
+      "description": "Back a launch with STT. Gated by the wallet's Sybil score when the pool sets minSybilScore > 0.",
+      "contract": "LaunchPool",
+      "method": "participate(uint256 poolId)",
+      "valueSTT": "variable (<= per-wallet cap)"
+    },
+    {
+      "id": "verifyFundMilestone",
+      "description": "Trigger AI verification of a treasury milestone. Invokes the Parse Website agent (domain search) then the LLM agent (PASS/FAIL); on PASS the escrowed tranche is released.",
+      "contract": "LaunchPool",
+      "method": "claimFundMilestone(uint256 poolId, uint256 milestoneIndex)",
+      "valueSTT": "0.80",
+      "invokes": ["parseWebsite", "llm"]
+    },
+    {
+      "id": "clawback",
+      "description": "Reclaim an investor's pro-rata share of funds tied to a failed or expired milestone.",
+      "contract": "LaunchPool",
+      "method": "clawback(uint256 poolId)"
+    },
+    {
+      "id": "finalize",
+      "description": "Finalize a sale after it ends. Routinely performed autonomously by the keeper agent.",
+      "contract": "LaunchPool",
+      "method": "finalize(uint256 poolId)"
+    },
+    {
+      "id": "verifyVestingMilestone",
+      "description": "Trigger AI verification of a vesting milestone (Parse Website + LLM); on PASS the tranche unlocks to the beneficiary.",
+      "contract": "VestingVault",
+      "method": "claimMilestone(uint256 scheduleId, uint256 milestoneIndex)",
+      "valueSTT": "0.80",
+      "invokes": ["parseWebsite", "llm"]
+    },
+    {
+      "id": "scoreProjectTrust",
+      "description": "Have the AI rate a registered project's legitimacy 0-100 (Parse Website + LLM). Buyers see this on the launch card.",
+      "contract": "TrustOracle",
+      "method": "requestTrustScore(uint256 poolId)",
+      "valueSTT": "0.80",
+      "invokes": ["parseWebsite", "llm"]
+    }
+  ],
+  "autonomy": {
+    "keeper": "An off-chain keeper agent continuously discovers ended sales and due milestones and performs finalize / verifyFundMilestone / verifyVestingMilestone with no human input.",
+    "events": ["AttestationStored", "PoolFinalized", "FundMilestoneClaimed", "FundMilestonePassed", "FundMilestoneFailed", "MilestonePassed", "TreasuryClawback"]
+  }
+}
