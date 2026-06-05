@@ -223,10 +223,15 @@ contract LaunchPool {
 
     // ── Finalization ───────────────────────────────────────────────────────
 
+    /// @notice Finalize a sale once it has ended. PERMISSIONLESS — anyone (e.g.
+    ///         any keeper agent) may call this; the outcome is fixed by
+    ///         totalRaised vs softCap and all proceeds/tokens route to the
+    ///         correct parties regardless of caller. This lets the protocol be
+    ///         operated by an open set of autonomous keepers, with no privileged
+    ///         operator.
     function finalize(uint256 poolId) external {
         Pool storage pool = pools[poolId];
 
-        require(msg.sender == poolOwner[poolId], "LaunchPool: not owner");
         require(block.timestamp > pool.endTime,  "LaunchPool: not ended");
         require(!pool.finalized,                 "LaunchPool: already finalized");
 
