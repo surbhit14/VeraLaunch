@@ -13,15 +13,26 @@
     "launch:participate": "hardhat run scripts/launch/participate.ts --network somnia",
     "launch:finalize": "hardhat run scripts/launch/finalizePool.ts --network somnia",
     "launch:claim": "hardhat run scripts/launch/claimOrRefund.ts --network somnia",
-    "monitor": "hardhat run scripts/monitor/eventListener.ts --network somnia"
+    "monitor": "hardhat run scripts/monitor/eventListener.ts --network somnia",
+    "test:full": "hardhat run scripts/test-contracts.ts --network somnia",
+    "check": "hardhat run scripts/check-state.ts --network somnia",
+    "diagnose": "hardhat run scripts/diagnose-request.ts --network somnia",
+    "test:vesting": "hardhat run scripts/test-vesting-e2e.ts --network somnia",
+    "test:sybil": "hardhat run scripts/test-sybil-e2e.ts --network somnia",
+    "seed": "hardhat run scripts/seed-pools.ts --network somnia",
+    "test:launchpad": "hardhat run scripts/test-launchpad-v2.ts --network somnia",
+    "keeper": "hardhat run scripts/keeper.ts --network somnia",
+    "demo": "hardhat run scripts/demo.ts --network somnia",
+    "deploy-trust": "hardhat run scripts/deploy-trust.ts --network somnia",
+    "agent:external": "hardhat run scripts/external-agent.ts --network somnia"
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-toolbox": "5.0.0",
     "@nomicfoundation/hardhat-viem": "2.0.6",
+    "dotenv": "16.5.0",
     "hardhat": "^2.28.0",
-    "typescript": "5.8.3",
     "ts-node": "10.9.2",
-    "dotenv": "16.5.0"
+    "typescript": "5.8.3"
   },
   "dependencies": {
     "@openzeppelin/contracts": "^5.0.0"

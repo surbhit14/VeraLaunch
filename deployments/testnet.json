@@ -1,0 +1,11 @@
+{
+  "network": "somnia-testnet",
+  "chainId": 50312,
+  "deployedAt": "2026-06-05T12:15:04.695Z",
+  "deployer": "0x9246644d16b86bf269cb0545d2e14c46287f6e84",
+  "SybilRegistry": "0x465303a0bd8668e144913dba8e7f4f7655b58500",
+  "VestingVault": "0x88d6df61b96ceb36065bca3d27e423bfa8578710",
+  "LaunchPool": "0x36754cde2259b00f99c050ba07262e40b89dc3aa",
+  "MockERC20": "0x55fc873724a0cc70bf9ec121843dbef409e8c137",
+  "TrustOracle": "0x9d4efc0305153231027e729b5de6f58b0973ff18"
+}
