@@ -10,6 +10,7 @@ import { usePools, useCountdown, poolStatus, type Pool } from '../hooks/usePools
 import { somniaTestnet } from '../chain'
 import { Link } from 'react-router-dom'
 import { TokenLogo, accentFor } from '../components/TokenLogo'
+import { useTxToasts } from '../components/Toast'
 
 const EXPLORER = somniaTestnet.blockExplorers.default.url
 
@@ -354,8 +355,9 @@ function InvestSheet({ pool, onClose, onDone }: { pool: Pool; onClose: () => voi
   const locked = pool.minSybilScore > 0 && !verified
   const tokensOut = (() => { try { return (parseEther(amount) * 10n ** 18n) / pool.tokenPrice } catch { return 0n } })()
 
-  const { writeContract, isPending, data: hash, reset } = useWriteContract()
+  const { writeContract, isPending, data: hash, error, reset } = useWriteContract()
   const { isLoading: confirming, isSuccess } = useWaitForTransactionReceipt({ hash })
+  useTxToasts({ label: `Backing ${symbol}`, pending: isPending, confirming, success: isSuccess, error, hash })
   useEffect(() => { if (isSuccess) { const t = setTimeout(onDone, 1400); return () => clearTimeout(t) } }, [isSuccess, onDone])
 
   const invest = () => {

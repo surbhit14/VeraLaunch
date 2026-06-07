@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, useRef } from 'react'
 import { usePublicClient } from 'wagmi'
 import { parseAbiItem, formatEther } from 'viem'
 import { Cpu, Sparkles, Activity, RefreshCw, Bot, Zap } from 'lucide-react'
@@ -39,7 +39,7 @@ const TRUST_EVENTS = [
 
 type Lane = 'ai' | 'keeper' | 'user'
 type Feed = {
-  id: string; block: bigint; lane: Lane; title: string; detail: string; tx: string
+  id: string; block: bigint; lane: Lane; title: string; detail: string; tx: string; ts?: number
 }
 
 const short = (a?: string) => (a ? `${a.slice(0, 6)}…${a.slice(-4)}` : '')
@@ -97,11 +97,22 @@ const LANE_META: Record<Lane, { label: string; icon: React.ReactNode; cls: strin
   user:   { label: 'On-chain',   icon: <Zap size={13} />,      cls: 'text-zinc-300 bg-zinc-700/30 border-zinc-700', dot: 'bg-zinc-500' },
 }
 
+function relTime(ts?: number) {
+  if (!ts) return ''
+  const s = Math.max(0, Math.floor(Date.now() / 1000) - ts)
+  if (s < 5) return 'just now'
+  if (s < 60) return `${s}s ago`
+  if (s < 3600) return `${Math.floor(s / 60)}m ago`
+  if (s < 86400) return `${Math.floor(s / 3600)}h ago`
+  return `${Math.floor(s / 86400)}d ago`
+}
+
 export default function Agents() {
   const client = usePublicClient()
   const [feed, setFeed] = useState<Feed[]>([])
   const [loading, setLoading] = useState(true)
   const [tick, setTick] = useState(0)
+  const timeCache = useRef<Map<string, number>>(new Map())
 
   const scan = useCallback(async () => {
     if (!client) return
@@ -136,7 +147,16 @@ export default function Agents() {
     }
 
     items.sort((a, b) => Number(b.block - a.block))
-    setFeed(items.slice(0, 50))
+    const top = items.slice(0, 50)
+
+    // fetch block timestamps for the displayed items (cached across refreshes)
+    const need = [...new Set(top.map(i => i.block.toString()))].filter(b => !timeCache.current.has(b)).slice(0, 30)
+    await Promise.all(need.map(async bs => {
+      try { const blk = await client.getBlock({ blockNumber: BigInt(bs) }); timeCache.current.set(bs, Number(blk.timestamp)) } catch {}
+    }))
+    for (const it of top) it.ts = timeCache.current.get(it.block.toString())
+
+    setFeed(top)
     setLoading(false)
   }, [client])
 
@@ -206,7 +226,7 @@ export default function Agents() {
                   </div>
                   <p className="text-xs text-zinc-500 truncate">{f.detail}</p>
                 </div>
-                <span className="text-[10px] text-zinc-600 font-mono shrink-0">#{f.block.toString().slice(-6)}</span>
+                <span className="text-[10px] text-zinc-600 font-mono shrink-0 whitespace-nowrap">{relTime(f.ts) || `#${f.block.toString().slice(-6)}`}</span>
               </a>
             )
           })
@@ -220,9 +240,10 @@ export default function Agents() {
           <Cpu size={16} />
         </span>
         <div className="min-w-0">
-          <p className="text-sm font-medium text-zinc-100">Agent-discoverable manifest</p>
-          <p className="text-xs text-zinc-500 truncate">
-            Other agents can discover & invoke VeraLaunch via <code className="text-zinc-400">/.well-known/agent.json</code> — contracts, callable actions, and the Somnia agents each one invokes.
+          <p className="text-sm font-medium text-zinc-100">Discoverable by other agents</p>
+          <p className="text-xs text-zinc-500">
+            Any agent can read <code className="text-zinc-400">/.well-known/agent.json</code> to discover every contract + callable action, then invoke it.
+            A live proof ships in the repo: <code className="text-zinc-400">npm run agent:external</code> has a third-party agent discover this protocol and back a launch on its own.
           </p>
         </div>
       </a>

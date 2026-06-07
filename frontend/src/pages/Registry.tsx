@@ -7,6 +7,7 @@ import {
 } from 'lucide-react'
 import { ADDRESSES, SYBIL_REGISTRY_ABI } from '../contracts'
 import { somniaTestnet } from '../chain'
+import { useTxToasts } from '../components/Toast'
 
 const EXPLORER = somniaTestnet.blockExplorers.default.url
 const lsKey = (addr: string) => `vera_attest_pending_${addr.toLowerCase()}`
@@ -65,8 +66,9 @@ export default function Registry() {
   }, [att, isPendingAI, exists, timestamp, pendingRequestTime, address])
 
   // ── Request attestation flow ─────────────────────────────────────────────
-  const { writeContract, isPending, data: hash, reset } = useWriteContract()
+  const { writeContract, isPending, data: hash, error, reset } = useWriteContract()
   const { isLoading: isConfirming, isSuccess: txSuccess } = useWaitForTransactionReceipt({ hash })
+  useTxToasts({ label: 'Score request', pending: isPending, confirming: isConfirming, success: txSuccess, error, hash })
 
   useEffect(() => {
     if (!txSuccess || !address) return

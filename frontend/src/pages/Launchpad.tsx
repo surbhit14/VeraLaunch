@@ -4,6 +4,7 @@ import { parseEther, formatEther, maxUint256 } from 'viem'
 import { Rocket, Plus, ExternalLink, AlertCircle, RefreshCw, CheckCircle, ShieldCheck } from 'lucide-react'
 import { ADDRESSES, LAUNCH_POOL_ABI, SYBIL_REGISTRY_ABI, ERC20_ABI } from '../contracts'
 import { TokenLogo } from '../components/TokenLogo'
+import { useTxToasts } from '../components/Toast'
 import { somniaTestnet } from '../chain'
 
 const EXPLORER = somniaTestnet.blockExplorers.default.url
@@ -179,8 +180,9 @@ function PoolCard({ pool, onAction }: { pool: Pool & { id: number }; onAction: (
   const hasContrib = contribution !== undefined && contribution > 0n
 
   const [amount, setAmount] = useState('1')
-  const { writeContract, isPending, data: hash, reset } = useWriteContract()
+  const { writeContract, isPending, data: hash, error, reset } = useWriteContract()
   const { isLoading: confirming, isSuccess: txDone } = useWaitForTransactionReceipt({ hash })
+  useTxToasts({ label: 'Transaction', pending: isPending, confirming, success: txDone, error, hash })
 
   useEffect(() => { if (txDone) { onAction(); reset() } }, [txDone, onAction, reset])
 
@@ -390,8 +392,9 @@ function CreatePoolForm({ onCreated }: { onCreated: () => void }) {
   const totalTokensBn = (() => { try { return parseEther(form.totalTokens) } catch { return 0n } })()
   const needsApproval = (allowance ?? 0n) < totalTokensBn
 
-  const { writeContract, isPending, data: hash, reset } = useWriteContract()
+  const { writeContract, isPending, data: hash, error, reset } = useWriteContract()
   const { isLoading: confirming, isSuccess: txDone } = useWaitForTransactionReceipt({ hash })
+  useTxToasts({ label: needsApproval ? 'Token approval' : 'Pool creation', pending: isPending, confirming, success: txDone, error, hash })
 
   useEffect(() => {
     if (txDone) {
@@ -453,7 +456,7 @@ function CreatePoolForm({ onCreated }: { onCreated: () => void }) {
         <input className="input font-mono text-xs" value={form.tokenAddress} onChange={set('tokenAddress')} />
       </FormGroup>
 
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <FormGroup label="Token Price (STT/token)">
           <input className="input" type="number" step="0.0001" value={form.tokenPrice} onChange={set('tokenPrice')} />
         </FormGroup>
@@ -556,8 +559,9 @@ function TreasuryPanel({ poolId, isOwner, hasContrib, onAction }: { poolId: numb
     address: ADDRESSES.LaunchPool, abi: LAUNCH_POOL_ABI, functionName: 'getClawbackable',
     args: [BigInt(poolId), address!], query: { enabled: !!address, refetchInterval: 12_000 },
   })
-  const { writeContract, isPending, data: hash, reset } = useWriteContract()
+  const { writeContract, isPending, data: hash, error, reset } = useWriteContract()
   const { isLoading: confirming, isSuccess } = useWaitForTransactionReceipt({ hash })
+  useTxToasts({ label: 'Treasury action', pending: isPending, confirming, success: isSuccess, error, hash })
   useEffect(() => { if (isSuccess) { refetch(); onAction(); reset() } }, [isSuccess, refetch, onAction, reset])
 
   const ms = (milestones ?? []) as any[]

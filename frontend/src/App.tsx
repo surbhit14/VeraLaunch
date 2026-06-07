@@ -7,12 +7,14 @@ import Launchpad from './pages/Launchpad'
 import Vesting from './pages/Vesting'
 import Discover from './pages/Discover'
 import Agents from './pages/Agents'
+import { ToastProvider } from './components/Toast'
 
 export default function App() {
   return (
+    <ToastProvider>
     <div className="min-h-screen flex flex-col">
       <Navbar />
-      <main className="flex-1 max-w-6xl mx-auto w-full px-6 py-10">
+      <main className="flex-1 max-w-6xl mx-auto w-full px-4 sm:px-6 py-8 sm:py-10 pb-28 md:pb-12">
         <Routes>
           <Route path="/"          element={<ErrorBoundary page="Home"><Home /></ErrorBoundary>} />
           <Route path="/discover"  element={<ErrorBoundary page="Discover"><Discover /></ErrorBoundary>} />
@@ -23,5 +25,6 @@ export default function App() {
         </Routes>
       </main>
     </div>
+    </ToastProvider>
   )
 }

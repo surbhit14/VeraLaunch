@@ -6,6 +6,7 @@ import {
   ExternalLink, AlertTriangle, RotateCcw, ShieldAlert, CheckCircle2,
 } from 'lucide-react'
 import { ADDRESSES, VESTING_VAULT_ABI, ERC20_ABI } from '../contracts'
+import { useTxToasts } from '../components/Toast'
 import { somniaTestnet } from '../chain'
 
 const EXPLORER = somniaTestnet.blockExplorers.default.url
@@ -284,8 +285,9 @@ function MilestoneRow({
   const isOverdue = nowSec > milestone.deadline
   const daysLeft = isOverdue ? 0 : Math.ceil((Number(milestone.deadline) - Number(nowSec)) / 86400)
 
-  const { writeContract, isPending, data: hash, reset } = useWriteContract()
+  const { writeContract, isPending, data: hash, error, reset } = useWriteContract()
   const { isLoading: confirming, isSuccess: txDone } = useWaitForTransactionReceipt({ hash })
+  useTxToasts({ label: 'Transaction', pending: isPending, confirming, success: txDone, error, hash })
   useEffect(() => { if (txDone) { onAction(); reset() } }, [txDone, onAction, reset])
   const busy = isPending || confirming
 
@@ -383,8 +385,9 @@ function MilestoneRow({
 }
 
 function EmergencyWithdrawBtn({ scheduleId, onAction }: { scheduleId: number; onAction: () => void }) {
-  const { writeContract, isPending, data: hash, reset } = useWriteContract()
+  const { writeContract, isPending, data: hash, error, reset } = useWriteContract()
   const { isLoading: confirming, isSuccess: txDone } = useWaitForTransactionReceipt({ hash })
+  useTxToasts({ label: 'Transaction', pending: isPending, confirming, success: txDone, error, hash })
   useEffect(() => { if (txDone) { onAction(); reset() } }, [txDone, onAction, reset])
 
   return (
@@ -446,8 +449,9 @@ function CreateScheduleForm({ onCreated }: { onCreated: () => void }) {
   const totalBn = (() => { try { return parseEther(totalAmount) } catch { return 0n } })()
   const needsApproval = (allowance ?? 0n) < totalBn
 
-  const { writeContract, isPending, data: hash, reset } = useWriteContract()
+  const { writeContract, isPending, data: hash, error, reset } = useWriteContract()
   const { isLoading: confirming, isSuccess: txDone } = useWaitForTransactionReceipt({ hash })
+  useTxToasts({ label: 'Transaction', pending: isPending, confirming, success: txDone, error, hash })
 
   useEffect(() => {
     if (txDone) {
@@ -496,7 +500,7 @@ function CreateScheduleForm({ onCreated }: { onCreated: () => void }) {
         <FormGroup label="Token Address">
           <input className="input font-mono text-xs" value={tokenAddr} onChange={e => setTokenAddr(e.target.value)} />
         </FormGroup>
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <FormGroup label="Total Amount (tokens)">
             <input className="input" type="number" value={totalAmount} onChange={e => setTotalAmount(e.target.value)} />
           </FormGroup>
