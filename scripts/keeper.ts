@@ -77,12 +77,13 @@ async function main() {
       for (let i = 0; i < poolCount; i++) {
         const p = await lp.read.pools([BigInt(i)]) as any;
         const owner = await lp.read.poolOwner([BigInt(i)]) as string;
-        if (owner.toLowerCase() !== me.toLowerCase()) continue; // only operate our own pools
+        const isOwner = owner.toLowerCase() === me.toLowerCase();
 
         const endTime = p[7] as bigint, totalRaised = p[8] as bigint;
         const finalized = p[10] as boolean, softCapMet = p[11] as boolean, usesTreasury = p[15] as boolean;
 
-        // auto-finalize
+        // auto-finalize — PERMISSIONLESS: the keeper finalizes ANY ended sale,
+        // not just its own. This is the protocol being operated by an open keeper.
         if (!finalized && now > endTime && totalRaised > 0n) {
           const key = `final-${i}`;
           if (!attempted.has(key) && canSpend) {
@@ -94,8 +95,9 @@ async function main() {
           continue;
         }
 
-        // auto-verify treasury milestones + narrate verdicts
-        if (finalized && softCapMet && usesTreasury) {
+        // auto-verify treasury milestones (the owner triggers these — they decide
+        // when a milestone is ready and pay the agent fee), + narrate verdicts
+        if (isOwner && finalized && softCapMet && usesTreasury) {
           const ms = await lp.read.getFundMilestones([BigInt(i)]) as any[];
           for (let j = 0; j < ms.length; j++) {
             const st = Number(ms[j].status ?? ms[j][4]);
