@@ -1,3 +1,4 @@
+
 # VeraLaunch
 
 **The token launchpad that runs itself.**
@@ -7,7 +8,9 @@ Somnia's on-chain consensus AI makes every decision — verifying real humans, v
 and releasing a team's raise *only* when it confirms a real milestone shipped — and an autonomous
 keeper agent operates the whole protocol with **no admin in the loop**.
 
-### 🔗 Live demo: **https://veralaunch-surbhit14s-projects.vercel.app**
+https://github.com/user-attachments/assets/4ee1263c-46ef-4a43-9855-6f18d436f229
+
+### 🔗 Live demo: **https://veralaunch.vercel.app/**
 Agent manifest: `https://veralaunch-surbhit14s-projects.vercel.app/.well-known/agent.json`
 
 > Most launches ask you to trust the team. VeraLaunch asks you to trust nobody:
@@ -49,7 +52,7 @@ VeraLaunch closes both with on-chain AI, and removes the operator entirely.
 | **Milestone verifier** | Parse Website + LLM | Whether a real-world milestone shipped → releases escrow / vests tokens |
 | **Keeper** | off-chain operator agent | Discovers state and invokes the others — runs the protocol |
 
-## Contracts (Somnia testnet, chainId 50312 — all source-verified)
+## Contracts (Somnia testnet, all source-verified)
 
 | Contract | Address | Verified |
 |---|---|---|
@@ -59,53 +62,11 @@ VeraLaunch closes both with on-chain AI, and removes the operator entirely.
 | TrustOracle | `0x9d4efc0305153231027e729b5de6f58b0973ff18` | [↗](https://somnia.w3us.site/address/0x9d4efc0305153231027e729b5de6f58b0973ff18#code) |
 | MockERC20 | `0x55fc873724a0cc70bf9ec121843dbef409e8c137` | [↗](https://somnia.w3us.site/address/0x55fc873724a0cc70bf9ec121843dbef409e8c137#code) |
 
-Machine-readable manifest: [`/.well-known/agent.json`](frontend/public/.well-known/agent.json)
-
 ## Tech stack
 - **Contracts:** Solidity 0.8.24 (viaIR), Hardhat, OpenZeppelin, Somnia agent platform.
 - **Frontend:** React + Vite + TypeScript, wagmi/viem, Tailwind. Mobile-first (swipe feed + bottom tab bar).
 - **Agents:** off-chain keeper + external-agent scripts (Hardhat + viem).
 
-## Run it locally
-
-```sh
-# 1. setup
-npm install
-cp .env.example .env          # add a funded Somnia-testnet PRIVATE_KEY
-npm run compile
-
-# 2. (optional) deploy your own + seed demo data
-npm run deploy                # writes deployments/testnet.json
-npm run seed                  # 4 demo launches (gating / vesting / escrow / trust)
-
-# 3. the autonomous keeper — leave it running
-npm run keeper
-
-# 4. the UI
-cd frontend && npm install && npm run dev   # http://localhost:5173
-```
-
-**See it operate itself:** open the **Agents** tab, then run `npm run demo` (drops a short-lived
-treasury pool) and watch the keeper finalize it and invoke the AI to release the escrow — live.
-
-**Prove external agents can use it:** `npm run agent:external` — a third-party agent discovers the
-protocol from the manifest and autonomously backs a launch.
-
-## Verification
-All contracts are source-verified on `somnia.w3us.site` (the Blockscout instance that indexes this
-chain and handles the viaIR build). Recipe + commands in [`VERIFY.md`](VERIFY.md).
-
-## How it maps to the judging criteria
-- **Functionality** — deployed + source-verified on Somnia testnet; every mechanic proven on-chain (`npm run test:sybil`, `test:vesting`, `test:launchpad`).
-- **Agent-First Design** — four AI agents decide; manifest + `agent:external` prove third-party discovery & invocation; permissionless operation.
-- **Innovation** — AI-verified milestone-gated treasury + clawback, AI project-trust oracle, multi-signal Sybil score.
-- **Autonomous Performance** — the keeper runs the whole protocol unattended and self-heals; the Agents tab shows it live.
-
-## Docs
-- [`DEMO.md`](DEMO.md) — full demo runbook
-- [`DEMO-VIDEO.md`](DEMO-VIDEO.md) — shot-by-shot video script
-- [`VERIFY.md`](VERIFY.md) — contract verification
-
 ---
 
-Built for the Somnia Agentic L1. 🤖
+Built for the Somnia Agentic L1
