@@ -18,7 +18,8 @@ import { parseEther, formatEther } from "viem";
 import * as fs from "fs";
 import * as path from "path";
 
-// The agent only knows this URL/file — everything else is discovered from it.
+// The agent only knows this URL — everything else is discovered from it.
+const MANIFEST_URL = process.env.MANIFEST_URL ?? "https://veralaunch-surbhit14s-projects.vercel.app/.well-known/agent.json";
 const MANIFEST_PATH = path.join(__dirname, "../frontend/public/.well-known/agent.json");
 
 // Minimal ABIs the agent builds from the manifest's documented method signatures.
@@ -57,9 +58,17 @@ async function main() {
   console.log("  External Agent — discovering VeraLaunch from its manifest");
   console.log("═══════════════════════════════════════════════════════════");
 
-  // ── 1. DISCOVER from the manifest ────────────────────────────────────────
-  const manifest = JSON.parse(fs.readFileSync(MANIFEST_PATH, "utf-8"));
-  log(`🔍 read manifest "${manifest.name}" — ${manifest.schema}`);
+  // ── 1. DISCOVER from the manifest (over the network, like a real agent) ───
+  let manifest: any;
+  try {
+    const res = await fetch(MANIFEST_URL);
+    manifest = await res.json();
+    log(`🔍 fetched manifest from ${MANIFEST_URL}`);
+  } catch {
+    manifest = JSON.parse(fs.readFileSync(MANIFEST_PATH, "utf-8"));
+    log(`🔍 read manifest from local file (network fetch unavailable)`);
+  }
+  log(`   "${manifest.name}" — ${manifest.schema}`);
   log(`   chain: ${manifest.chain.name} (${manifest.chain.chainId})`);
   log(`   discovered ${Object.keys(manifest.contracts).length} contracts and ${manifest.actions.length} callable actions:`);
   for (const a of manifest.actions) log(`     · ${a.id} → ${a.contract}.${a.method.split("(")[0]}()`);
