@@ -6,7 +6,7 @@
     "name": "Somnia Testnet",
     "chainId": 50312,
     "rpc": "https://api.infra.testnet.somnia.network",
-    "explorer": "https://testnet.somnia.exploreme.pro"
+    "explorer": "https://somnia.w3us.site"
   },
   "contracts": {
     "SybilRegistry": "0x465303a0bd8668e144913dba8e7f4f7655b58500",

@@ -9,8 +9,9 @@ export const somniaTestnet = defineChain({
   },
   blockExplorers: {
     default: {
-      name: 'SocialScan',
-      url: 'https://somnia-testnet.socialscan.io',
+      // Blockscout instance that indexes this chain AND has our verified contracts.
+      name: 'Somnia Explorer',
+      url: 'https://somnia.w3us.site',
     },
   },
   testnet: true,

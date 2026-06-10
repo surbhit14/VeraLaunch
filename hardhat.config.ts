@@ -21,6 +21,23 @@ const config: HardhatUserConfig = {
       accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [],
     },
   },
+  // Source verification — somnia.w3us.site is the Blockscout instance that indexes
+  // this testnet chain and handles our viaIR build. No real API key is required.
+  // (`npx hardhat verify --network somnia <addr> [args]` — all 5 verified here.)
+  etherscan: {
+    apiKey: { somnia: "verifyme" },
+    customChains: [
+      {
+        network: "somnia",
+        chainId: 50312,
+        urls: {
+          apiURL: process.env.VERIFY_API_URL ?? "https://somnia.w3us.site/api",
+          browserURL: process.env.VERIFY_BROWSER_URL ?? "https://somnia.w3us.site",
+        },
+      },
+    ],
+  },
+  sourcify: { enabled: false },
   paths: {
     sources: "./contracts",
     scripts: "./scripts",
