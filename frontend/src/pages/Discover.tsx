@@ -1,8 +1,9 @@
 import { useState, useRef, useEffect } from 'react'
-import { useAccount, useReadContract, useWriteContract, useWaitForTransactionReceipt } from 'wagmi'
+import { useAccount, useConnect, useReadContract, useWriteContract, useWaitForTransactionReceipt } from 'wagmi'
+import { injected } from 'wagmi/connectors'
 import { parseEther, formatEther } from 'viem'
 import {
-  X, Zap, RefreshCw, Lock, Clock, ShieldCheck, Rocket,
+  X, Zap, RefreshCw, Lock, Clock, ShieldCheck, Wallet,
   ChevronUp, CheckCircle2, ExternalLink, RotateCcw, Sparkles,
 } from 'lucide-react'
 import { ADDRESSES, LAUNCH_POOL_ABI, SYBIL_REGISTRY_ABI, ERC20_ABI, TRUST_ORACLE_ABI } from '../contracts'
@@ -16,7 +17,6 @@ const EXPLORER = somniaTestnet.blockExplorers.default.url
 
 export default function Discover() {
   const { pools, refetch } = usePools(15_000)
-  const { isConnected } = useAccount()
 
   // Only pools a retail investor can act on: live or upcoming, not finalized/ended.
   const deck = pools
@@ -56,18 +56,14 @@ export default function Discover() {
       {/* Deck */}
       <div className="relative h-[58vh] min-h-[400px] sm:h-[460px] select-none" style={{ overscrollBehavior: 'contain' }}>
         {/* ambient glow tied to the top card */}
-        {isConnected && remaining.length > 0 && (
+        {remaining.length > 0 && (
           <div
             className="absolute -inset-6 rounded-[3rem] blur-3xl opacity-40 pointer-events-none transition-all duration-500"
             style={{ background: `radial-gradient(60% 50% at 50% 30%, ${accentFor(remaining[0].projectToken).glow}, transparent 70%)` }}
           />
         )}
-        {!isConnected && (
-          <Overlay icon={<Rocket size={30} className="text-zinc-600" />} title="Connect to start"
-            sub="Connect your wallet to browse and back token launches" />
-        )}
 
-        {isConnected && remaining.length === 0 && (
+        {remaining.length === 0 && (
           <Overlay
             icon={<CheckCircle2 size={30} className="text-emerald-400" />}
             title={seen > 0 ? "You're all caught up" : 'No live launches yet'}
@@ -80,7 +76,7 @@ export default function Discover() {
           />
         )}
 
-        {isConnected && remaining.slice(0, 3).reverse().map((pool, ri) => {
+        {remaining.slice(0, 3).reverse().map((pool, ri) => {
           const stackIndex = remaining.slice(0, 3).length - 1 - ri // 0 = top
           return (
             <SwipeCard
@@ -95,7 +91,7 @@ export default function Discover() {
       </div>
 
       {/* Action bar */}
-      {isConnected && remaining.length > 0 && (
+      {remaining.length > 0 && (
         <div className="flex items-center justify-center gap-6 mt-6">
           <button
             onClick={() => advance()}
@@ -118,7 +114,7 @@ export default function Discover() {
       )}
 
       {/* Hint */}
-      {isConnected && remaining.length > 0 && (
+      {remaining.length > 0 && (
         <p className="text-center text-xs text-zinc-600 mt-4">
           Swipe right or tap <Zap size={11} className="inline -mt-0.5 text-indigo-400" /> to back ·
           left or <X size={11} className="inline -mt-0.5" /> to skip
@@ -338,6 +334,7 @@ function SwipeCard({ pool, isTop, depth, onSwipe }: {
 // ── Invest sheet ─────────────────────────────────────────────────────────────────
 function InvestSheet({ pool, onClose, onDone }: { pool: Pool; onClose: () => void; onDone: () => void }) {
   const { address } = useAccount()
+  const { connect, isPending: connecting } = useConnect()
   const accent = accentFor(pool.projectToken)
   const perWalletSTT = Number(formatEther(pool.perWalletCap))
   const { data: sym } = useReadContract({ address: pool.projectToken, abi: ERC20_ABI, functionName: 'symbol' })
@@ -392,7 +389,25 @@ function InvestSheet({ pool, onClose, onDone }: { pool: Pool; onClose: () => voi
           <button onClick={onClose} className="text-zinc-500 hover:text-zinc-300"><ChevronUp size={18} className="rotate-180" /></button>
         </div>
 
-        {isSuccess ? (
+        {!address ? (
+          <div className="space-y-4">
+            <div className="bg-indigo-500/5 border border-indigo-500/20 rounded-xl p-4 flex items-start gap-3">
+              <Wallet size={16} className="text-indigo-400 mt-0.5 shrink-0" />
+              <div>
+                <p className="text-sm font-medium text-indigo-200">Connect a wallet to back this launch</p>
+                <p className="text-xs text-zinc-400 mt-0.5">Browsing is open to everyone — you only need a wallet to invest.</p>
+              </div>
+            </div>
+            <button className="btn-primary w-full flex items-center justify-center gap-2 py-3"
+              onClick={() => connect({ connector: injected() })} disabled={connecting}>
+              {connecting ? <RefreshCw size={14} className="animate-spin" /> : <Wallet size={14} />}
+              {connecting ? 'Connecting…' : 'Connect wallet'}
+            </button>
+            <p className="text-center text-[11px] text-zinc-600">
+              On a phone? Open this site inside your wallet app's built-in browser (MetaMask, Rainbow…) to connect.
+            </p>
+          </div>
+        ) : isSuccess ? (
           <div className="py-6 text-center space-y-2">
             <CheckCircle2 size={36} className="text-emerald-400 mx-auto" />
             <p className="font-medium text-emerald-300">You're in!</p>
