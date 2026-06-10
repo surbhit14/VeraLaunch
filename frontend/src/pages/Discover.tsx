@@ -54,7 +54,7 @@ export default function Discover() {
       </div>
 
       {/* Deck */}
-      <div className="relative h-[460px] select-none">
+      <div className="relative h-[58vh] min-h-[400px] sm:h-[460px] select-none" style={{ overscrollBehavior: 'contain' }}>
         {/* ambient glow tied to the top card */}
         {isConnected && remaining.length > 0 && (
           <div
@@ -180,7 +180,7 @@ function SwipeCard({ pool, isTop, depth, onSwipe }: {
 
   const onDown = (e: React.PointerEvent) => {
     if (!isTop) return
-    ;(e.target as HTMLElement).setPointerCapture(e.pointerId)
+    try { e.currentTarget.setPointerCapture(e.pointerId) } catch { /* older browsers */ }
     start.current = { x: e.clientX, y: e.clientY }
     setDragging(true)
   }
@@ -209,12 +209,16 @@ function SwipeCard({ pool, isTop, depth, onSwipe }: {
       onPointerCancel={onUp}
       className="absolute inset-0"
       style={{
-        transform: `translate(${x}px, ${leaving ? -40 : drag.y}px) rotate(${rot}deg) scale(${1 - depth * 0.04})`,
-        translate: `0 ${depth * 14}px`,
+        // depth offset folded into transform (the separate `translate` longhand
+        // isn't supported on older mobile Safari)
+        transform: `translate(${x}px, ${(leaving ? -40 : drag.y) + depth * 14}px) rotate(${rot}deg) scale(${1 - depth * 0.04})`,
         transition: dragging ? 'none' : 'transform 0.32s cubic-bezier(.2,.8,.2,1)',
         zIndex: 10 - depth,
         cursor: isTop ? 'grab' : 'default',
         touchAction: 'none',
+        WebkitUserSelect: 'none',
+        userSelect: 'none',
+        WebkitTapHighlightColor: 'transparent',
         opacity: depth > 1 ? 0.6 : 1,
         pointerEvents: isTop ? 'auto' : 'none',
       }}
