@@ -1,3 +1,4 @@
+
 # VeraLaunch
 
 **The token launchpad that runs itself.**
@@ -6,6 +7,8 @@ An autonomous, AI-verified launchpad on the [Somnia](https://somnia.network) Age
 Somnia's on-chain consensus AI makes every decision — verifying real humans, vetting projects,
 and releasing a team's raise *only* when it confirms a real milestone shipped — and an autonomous
 keeper agent operates the whole protocol with **no admin in the loop**.
+
+https://github.com/user-attachments/assets/4ee1263c-46ef-4a43-9855-6f18d436f229
 
 ### 🔗 Live demo: **https://veralaunch.vercel.app/**
 Agent manifest: `https://veralaunch-surbhit14s-projects.vercel.app/.well-known/agent.json`
