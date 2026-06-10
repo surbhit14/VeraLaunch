@@ -209,8 +209,7 @@ export default function Agents() {
           <div className="px-5 py-16 text-center text-sm text-zinc-500">Scanning the chain…</div>
         ) : feed.length === 0 ? (
           <div className="px-5 py-16 text-center text-sm text-zinc-500">
-            No recent agent activity. Run <code className="text-zinc-300">npm run demo</code> and{' '}
-            <code className="text-zinc-300">npm run keeper</code> to see it operate itself.
+            No recent agent activity.
           </div>
         ) : (
           feed.map(f => {
